@@ -1,6 +1,6 @@
-# =========================
-# MySQL Deployment & PVC
-# =========================
+# ======================================
+# MYSQL PVC
+# ======================================
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -13,6 +13,9 @@ spec:
       storage: 5Gi
 
 ---
+# ======================================
+# MYSQL DEPLOYMENT
+# ======================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,10 +34,10 @@ spec:
         - name: mysql
           image: mysql:8.0
           env:
-            - name: MYSQL_DATABASE
-              value: ecommerce
             - name: MYSQL_ROOT_PASSWORD
               value: root
+            - name: MYSQL_DATABASE
+              value: travel
           ports:
             - containerPort: 3306
           volumeMounts:
@@ -45,10 +48,10 @@ spec:
           persistentVolumeClaim:
             claimName: mysql-pvc
 
-# =========================
-# Backend Deployment
-# =========================
 ---
+# ======================================
+# BACKEND DEPLOYMENT
+# ======================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -65,24 +68,21 @@ spec:
     spec:
       containers:
         - name: backend
-          image: bhavya33060/k8sbes201a:v13
-
+          image: bhavya33060/travel-be:v1
           ports:
             - containerPort: 8080
           env:
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql:3306/ecommerce
+              value: jdbc:mysql://mysql:3306/travel
             - name: SPRING_DATASOURCE_USERNAME
               value: root
             - name: SPRING_DATASOURCE_PASSWORD
               value: root
-            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-              value: update
 
-# =========================
-# Frontend Deployment
-# =========================
 ---
+# ======================================
+# FRONTEND DEPLOYMENT
+# ======================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -99,25 +99,24 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: bhavya33060/k8sfes201a:v7
-
+          image: bhavya33060/travel-fe:v1
           ports:
-            - containerPort: 8080
+            - containerPort: 80
           env:
-            - name: REACT_APP_BACKEND_URL
+            - name: VITE_BACKEND_URL
               value: http://backend:8080
 
-# =========================
-# Services
-# =========================
 ---
-# MySQL Service
+# ======================================
+# SERVICES
+# ======================================
+
+# ---- MySQL Service ----
 apiVersion: v1
 kind: Service
 metadata:
   name: mysql
 spec:
-  type: ClusterIP
   selector:
     app: mysql
   ports:
@@ -125,7 +124,7 @@ spec:
       targetPort: 3306
 
 ---
-# Backend Service
+# ---- Backend Service ----
 apiVersion: v1
 kind: Service
 metadata:
@@ -140,7 +139,7 @@ spec:
       nodePort: 30083
 
 ---
-# Frontend Service
+# ---- Frontend Service ----
 apiVersion: v1
 kind: Service
 metadata:
@@ -150,6 +149,6 @@ spec:
   selector:
     app: frontend
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: 80
+      targetPort: 80
       nodePort: 30082
