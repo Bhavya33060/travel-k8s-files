@@ -68,7 +68,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: bhavya33060/travel-be:v1
+          image: bhavya33060/travel-be:v2
           ports:
             - containerPort: 8080
           env:
@@ -111,7 +111,7 @@ spec:
 # SERVICES
 # ======================================
 
-# ---- MySQL Service ----
+# ---- MySQL Service
 apiVersion: v1
 kind: Service
 metadata:
@@ -124,7 +124,7 @@ spec:
       targetPort: 3306
 
 ---
-# ---- Backend Service ----
+# ---- Backend Service
 apiVersion: v1
 kind: Service
 metadata:
@@ -136,10 +136,10 @@ spec:
   ports:
     - port: 8080
       targetPort: 8080
-      nodePort: 30083
+      nodePort: 32001   # CLEAN NEW PORT
 
 ---
-# ---- Frontend Service ----
+# ---- Frontend Service
 apiVersion: v1
 kind: Service
 metadata:
@@ -151,4 +151,4 @@ spec:
   ports:
     - port: 80
       targetPort: 80
-      nodePort: 30082
+      nodePort: 32000   # CLEAN NEW PORT

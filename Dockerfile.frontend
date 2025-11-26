@@ -1,22 +1,32 @@
 # ===========================
-# FRONTEND DOCKERFILE
+# FRONTEND + EXPRESS DOCKERFILE
 # ===========================
 
-# Stage 1 — Build React App
-FROM node:18 AS build
+# Step 1: Build Vite Frontend
+FROM node:18 AS build-stage
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y git
 
-# Clone your TravelForge Repo
+# Clone your frontend repo
 RUN git clone https://github.com/Bhavya33060/TravelForge .
 
+# Install dependencies
 RUN npm install
+
+# Build Vite App
 RUN npm run build
 
-# Stage 2 — Serve with Nginx
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Step 2: Production Server (Express)
+FROM node:18 AS prod-stage
+WORKDIR /app
+
+COPY --from=build-stage /app .
+
+# Install only production dependencies
+RUN npm install --omit=dev
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]
